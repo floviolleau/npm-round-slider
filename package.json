@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/floviolleau/npm-round-slider/issues"
   },
-  "homepage": "https://github.com/floviolleau/npm-round-slider#readme"
+  "homepage": "https://github.com/floviolleau/npm-round-slider#readme",
+  "devDependencies": {
+    "jquery": "^3.1.1"
+  }
 }
