@@ -1,0 +1,388 @@
+﻿@import "settings/roundslider-settings";
+
+.rs-control {
+  position: relative;
+  outline: 0 none;
+
+  * {
+    //Instead of the line below you could use @include box-sizing($bs)
+    box-sizing: border-box;
+    &:before {
+      //Instead of the line below you could use @include box-sizing($bs)
+      box-sizing: border-box;
+    }
+    &:after {
+      //Instead of the line below you could use @include box-sizing($bs)
+      box-sizing: border-box;
+    }
+  }
+
+  .rs-overlay1 {
+    //Instead of the line below you could use @include transform-origin($origin-x, $origin-y, $origin-z, $only3d)
+    transform-origin: 50% 100%;
+  }
+
+  .rs-overlay2 {
+    //Instead of the line below you could use @include transform-origin($origin-x, $origin-y, $origin-z, $only3d)
+    transform-origin: 50% 100%;
+  }
+
+  .rs-overlay {
+    //Instead of the line below you could use @include transform-origin($origin-x, $origin-y, $origin-z, $only3d)
+    transform-origin: 100% 100%;
+  }
+
+  &.rs-error {
+    border: 1px dotted;
+    text-align: center;
+  }
+
+  .rs-split .rs-path {
+    //Instead of the line below you could use @include transform-origin($origin-x, $origin-y, $origin-z, $only3d)
+    transform-origin: 50% 100%;
+  }
+}
+
+.rs-container {
+  position: relative;
+}
+
+.rs-bar {
+  //Instead of the line below you could use @include transform-origin($origin-x, $origin-y, $origin-z, $only3d)
+  transform-origin: 100% 50%;
+  position: absolute;
+  height: 0;
+  z-index: 10;
+
+  &.rs-rounded {
+    z-index: 5;
+  }
+
+  .rs-seperator {
+    height: 0;
+    display: block;
+    float: left;
+  }
+
+  &.rs-start {
+    .rs-seperator {
+      border-top: none;
+    }
+    &.rs-rounded .rs-seperator {
+      //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+      border-radius: 0 0 1000px 1000px;
+    }
+  }
+
+  &.rs-end {
+    .rs-seperator {
+      border-bottom: none;
+    }
+
+    &.rs-rounded .rs-seperator {
+      //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+      border-radius: 1000px 1000px 0 0;
+    }
+  }
+
+  &:not(.rs-rounded) .rs-seperator {
+    border-left: none;
+    border-right: none;
+  }
+}
+
+.rs-readonly {
+  height: 100%;
+  width: 100%;
+  top: 0;
+  position: absolute;
+  z-index: 100;
+
+  .rs-handle.rs-move {
+    cursor: default;
+  }
+
+  .rs-tooltip.edit:hover {
+    border-color: transparent;
+    cursor: default;
+  }
+}
+
+.rs-disabled {
+  opacity: 0.35;
+}
+
+.rs-inner-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.quarter {
+  .rs-bar {
+    width: 100%;
+  }
+
+  div.rs-block {
+    height: 200%;
+    width: 200%;
+  }
+
+  &.right .rs-bar {
+    right: 100%;
+  }
+}
+
+.half {
+  &.top {
+    .rs-tooltip {
+      left: 50%;
+    }
+
+    div.rs-block {
+      height: 200%;
+      width: 100%;
+    }
+  }
+  &.bottom {
+    .rs-tooltip {
+      left: 50%;
+    }
+
+    div.rs-block {
+      height: 200%;
+      width: 100%;
+    }
+  }
+
+  &.left {
+    .rs-bar {
+      width: 100%;
+      top: 50%;
+    }
+
+    .rs-tooltip {
+      top: 50%;
+    }
+
+    div.rs-block {
+      height: 100%;
+      width: 200%;
+    }
+  }
+
+  &.right {
+    .rs-bar {
+      width: 100%;
+      top: 50%;
+      right: 100%;
+    }
+
+    .rs-tooltip {
+      top: 50%;
+    }
+
+    div.rs-block {
+      height: 100%;
+      width: 200%;
+    }
+  }
+
+  .rs-bar {
+    width: 50%;
+  }
+}
+
+.bottom {
+  .rs-bar {
+    top: 0;
+  }
+
+  .rs-tooltip {
+    top: 0;
+  }
+
+  > .rs-inner-container > .rs-block {
+    top: auto;
+    bottom: 0;
+  }
+}
+
+.right {
+  .rs-tooltip {
+    left: 0;
+  }
+
+  .rs-inner-container > .rs-block {
+    right: 0;
+  }
+}
+
+.rs-block {
+  height: 100%;
+  width: 100%;
+  display: block;
+  position: absolute;
+  top: 0;
+  overflow: hidden;
+  z-index: 3;
+
+  .rs-inner {
+    //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+    border-radius: 1000px;
+    display: block;
+    height: 100%;
+    width: 100%;
+    position: relative;
+  }
+}
+
+.rs-overlay {
+  width: 50%;
+  @extend %rs-overlay;
+}
+
+.rs-overlay1 {
+  width: 100%;
+  @extend %rs-overlay;
+}
+
+.rs-overlay2 {
+  width: 100%;
+  @extend %rs-overlay;
+}
+
+.full {
+  .rs-bar {
+    width: 50%;
+    top: 50%;
+  }
+
+  .rs-tooltip {
+    top: 50%;
+    left: 50%;
+  }
+}
+
+.rs-handle {
+  //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+  border-radius: 1000px;
+  outline: 0 none;
+  float: left;
+  background-color: $color_gunsmoke;
+
+  &.rs-move {
+    cursor: move;
+  }
+
+  &.rs-handle-square {
+    //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+    border-radius: 0;
+  }
+}
+
+.rs-path {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.rs-tooltip {
+  position: absolute;
+  cursor: default;
+  border: 1px solid transparent;
+  z-index: 10;
+
+  .rs-input {
+    outline: 0 none;
+    border: none;
+    background: transparent;
+    padding: 5px 8px;
+  }
+
+  &.edit {
+    padding: 5px 8px;
+    &:hover {
+      border: 1px solid $color_silver_chalice;
+      cursor: pointer;
+    }
+  }
+
+  &.hover {
+    border: 1px solid $color_silver_chalice;
+    cursor: pointer;
+  }
+}
+
+.rs-tooltip-text {
+  font-family: $font;
+  font-size: 13px;
+  //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+  border-radius: 7px;
+  text-align: center;
+}
+
+.rs-handle-dot {
+  border: 1px solid $color_silver_chalice;
+  padding: 6px;
+  background-color: $white;
+
+  &:after {
+    display: block;
+    content: "";
+    border: 1px solid $color_silver_chalice;
+    height: 100%;
+    width: 100%;
+    //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+    border-radius: 100%;
+    background-color: $color_gunsmoke;
+  }
+}
+
+.rs-seperator {
+  border: 1px solid $color_silver_chalice;
+}
+
+.rs-border {
+  border: 1px solid $color_silver_chalice;
+}
+
+.rs-path-color {
+  background-color: $white;
+}
+
+.rs-range-color {
+  background-color: $color_picton_blue;
+}
+
+.rs-bg-color {
+  background-color: $white;
+}
+
+.rs-animation .rs-transition {
+  transition: all 0.5s linear 0s;
+}
+
+div.rs-block {
+  //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+  border-radius: 100%;
+}
+
+.rs-split .rs-path {
+  //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+  border-radius: 1000px 1000px 0 0;
+  overflow: hidden;
+  height: 50%;
+  position: absolute;
+  top: 0;
+  z-index: 2;
+}
+
+.top .rs-tooltip {
+  bottom: 0;
+}
+
+.left .rs-tooltip {
+  right: 0;
+}

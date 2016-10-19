@@ -1,0 +1,17 @@
+//colors
+$white: white;
+$color_silver_chalice: #aaaaaa;
+$color_picton_blue: #54bbe0;
+$color_gunsmoke: #838383;
+
+//fonts
+$font: verdana;
+
+//@extend-elements
+%rs-overlay {
+  position: absolute;
+  background-color: $white;
+  z-index: 3;
+  top: 0;
+  height: 50%;
+}
