@@ -1,5 +1,5 @@
-react-npm-round-slider
-======================
+npm-round-slider
+================
 
 [![NPM version][npm-image]][npm-url]
 [![Downloads][downloads-image]][downloads-url]
