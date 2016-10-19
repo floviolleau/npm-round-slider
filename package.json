@@ -1,8 +1,11 @@
 {
+  "title": "Npm package for roundSlider",
   "name": "npm-round-slider",
   "version": "1.0.0",
   "description": "Npm package for roundSlider (https://github.com/soundar24/roundSlider)",
   "main": "dist/roundslider.js",
+  "style": "dist/roundslider.min.css",
+  "browser": "dist/roundslider.js",
   "scripts": {},
   "repository": {
     "type": "git",
@@ -18,7 +21,24 @@
     "email": "floviolleau@laposte.net",
     "name": "Florent VIOLLEAU"
   },
-  "license": "MIT",
+  "license": "MIT OR WTFPL",
+  "licenses": [
+    {
+      "type": "WTFPL",
+      "url": "https://github.com/floviolleau/npm-round-slider/blob/master/LICENSE-WTFPL"
+    },
+    {
+      "type": "MIT",
+      "url": "https://github.com/floviolleau/npm-round-slider/blob/master/LICENSE-MIT"
+    }
+  ],
+  "files": [
+    "dist",
+    "LICENSE-WTFPL",
+    "LICENSE-MIT",
+    "package.json",
+    "README.md"
+  ],
   "bugs": {
     "url": "https://github.com/floviolleau/npm-round-slider/issues"
   },
