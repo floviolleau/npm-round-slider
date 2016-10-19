@@ -1,7 +1,7 @@
 {
   "title": "Npm package for roundSlider",
   "name": "npm-round-slider",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Npm package for roundSlider (https://github.com/soundar24/roundSlider)",
   "main": "dist/roundslider.js",
   "style": "dist/roundslider.min.css",
