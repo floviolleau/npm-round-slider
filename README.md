@@ -1,4 +1,16 @@
+react-npm-round-slider
+======================
+
+[![NPM version][npm-image]][npm-url]
+[![Downloads][downloads-image]][downloads-url]
+
 # roundSlider - A free jQuery plugin
+
+### Installation
+
+```
+$ npm install npm-round-slider --save
+```
 
 ### What's this ?
 
@@ -71,3 +83,8 @@ To know more about the **Options**, please check the [documentation](http://roun
 ### Licence
 
 roundSlider is licensed under the terms of the [MIT license](http://roundsliderui.com/licence.html "roundSlider - MIT licence").
+
+[npm-image]: https://img.shields.io/npm/v/npm-round-slider.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/npm-round-slider
+[downloads-image]: http://img.shields.io/npm/dm/npm-round-slider.svg?style=flat-square
+[downloads-url]: https://npmjs.org/package/npm-round-slider
