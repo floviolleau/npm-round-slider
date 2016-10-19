@@ -1,11 +1,11 @@
 //colors
-$white: white;
-$color_silver_chalice: #aaaaaa;
-$color_picton_blue: #54bbe0;
-$color_gunsmoke: #838383;
+$white: white !default;
+$color_silver_chalice: #aaaaaa !default;
+$color_picton_blue: #54bbe0 !default;
+$color_gunsmoke: #838383 !default;
 
 //fonts
-$font: verdana;
+$font: verdana !default;
 
 //@extend-elements
 %rs-overlay {
