@@ -12,6 +12,29 @@ npm-round-slider
 $ npm install npm-round-slider --save
 ```
 
+### The Sass way
+
+If you like to customize you can either remove the CSS fully and write your own selectors using the Sass mixins or you just use the Sass settings file to customize the look and feel.
+
+To customize the style using the Sass settings file you should copy the settings file to your own Sass folder.
+
+```
+cp node_modules/npm-round-slider/dist/scss/settings/_roundslider-settings.scss styles
+```
+
+Then just import your copy of the settings file before you import the roundslider.scss file and change the settings in your copy as desired.
+
+```
+@import "_my-roundslider-settings";
+@import "npm-round-slider/dist/scss/roundslider";
+```
+
+Default settings
+
+The settings file contains all relevant variables used in the mixins and while generating the default classes. You can simply change the settings for styling. If you want to override certain settings based on state or pseeudo selectors, you can use the individual mixins to only override specific styles.
+
+Take a look at the settings to see how to customize the style of the default class selectors.
+
 ### What's this ?
 
 Round slider (also can call as Circular slider, Radial slider) is a jQuery plugin that allows the user to select a value or range of values.
