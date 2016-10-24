@@ -6,7 +6,9 @@
   "main": "dist/roundslider.js",
   "style": "dist/roundslider.min.css",
   "browser": "dist/roundslider.js",
-  "scripts": {},
+  "scripts": {
+    "uglify": "uglifyjs --compress --mangle dist/roundslider.js --output dist/roundslider.min.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/floviolleau/npm-round-slider.git"
@@ -44,6 +46,7 @@
   },
   "homepage": "https://github.com/floviolleau/npm-round-slider#readme",
   "devDependencies": {
-    "jquery": "^3.1.1"
+    "jquery": "^3.1.1",
+    "uglify-js": "^2.7.3"
   }
 }
