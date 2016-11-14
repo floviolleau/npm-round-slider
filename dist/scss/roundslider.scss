@@ -226,7 +226,7 @@
   position: absolute;
   top: 0;
   overflow: hidden;
-  z-index: 3;
+  z-index: 6;
 
   .rs-inner {
     //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
@@ -376,7 +376,7 @@ div.rs-block {
   height: 50%;
   position: absolute;
   top: 0;
-  z-index: 2;
+  z-index: 0;
 }
 
 .top .rs-tooltip {

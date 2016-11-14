@@ -3,10 +3,10 @@
  * MIT license | http://roundsliderui.com/licence.html
  */
 (function ($, window, undefined) {
-    "use strict";
+    'use strict';
     /*jslint nomen: true */
 
-    var pluginName = "roundSlider";
+    var pluginName = 'roundSlider';
 
     // The plugin initialization
     $.fn[pluginName] = function (options) {
@@ -15,14 +15,14 @@
 
     RoundSlider.prototype = {
         pluginName: pluginName,
-        version: "1.3",
+        version: '1.3',
 
         // after the control initialization the updated default values
         // are merged into the options
         options: {},
 
         // default properties of the plugin. while add a new property,
-        // that type should be included in the "_props:" for validation
+        // that type should be included in the '_props:' for validation
         defaults: {
             min: 0,
             max: 100,
@@ -30,9 +30,9 @@
             value: null,
             radius: 85,
             width: 18,
-            handleSize: "+0",
+            handleSize: '+0',
             startAngle: 0,
-            endAngle: "+360",
+            endAngle: '+360',
             animation: true,
             showTooltip: true,
             editableTooltip: true,
@@ -40,10 +40,10 @@
             disabled: false,
             keyboardAction: true,
             mouseScrollAction: false,
-            lineCap: "square",
-            sliderType: "default",
-            circleShape: "full",
-            handleShape: "round",
+            lineCap: 'square',
+            sliderType: 'default',
+            circleShape: 'full',
+            handleShape: 'round',
 
             // events
             beforeCreate: null,
@@ -57,10 +57,10 @@
 
         _props: function () {
             return {
-                numberType: ["min", "max", "step", "radius", "width", "startAngle"],
-                booleanType: ["animation", "showTooltip", "editableTooltip", "readOnly", "disabled",
-                    "keyboardAction", "mouseScrollAction"],
-                stringType: ["sliderType", "circleShape", "handleShape", "lineCap"]
+                numberType: ['min', 'max', 'step', 'radius', 'width', 'startAngle'],
+                booleanType: ['animation', 'showTooltip', 'editableTooltip', 'readOnly', 'disabled',
+                    'keyboardAction', 'mouseScrollAction'],
+                stringType: ['sliderType', 'circleShape', 'handleShape', 'lineCap']
             };
         },
 
@@ -69,11 +69,12 @@
             this._isBrowserSupport = this._isBrowserSupported();
             this._isKO = false;
             this._isAngular = false;
+            this._onInitRendering = false;
 
-            if (this.control.is("input")) {
+            if (this.control.is('input')) {
                 this._isInputType = true;
                 this._hiddenField = this.control;
-                this.control = createElement("div");
+                this.control = createElement('div');
                 this.control.insertAfter(this._hiddenField);
                 this.options.value = this._hiddenField.val() || this.options.value;
                 var that = this;
@@ -83,9 +84,9 @@
                 this._checkAngular();
             }
             this._bindOnDrag = false;
-            var _updateOn = this._dataElement().attr("data-updateon");
-            if (typeof _updateOn == "string") {
-                if (_updateOn == "drag") {
+            var _updateOn = this._dataElement().attr('data-updateon');
+            if (typeof _updateOn === 'string') {
+                if (_updateOn === 'drag') {
                     this._bindOnDrag = true;
                 }
             } else if (this._isAngular) {
@@ -112,24 +113,26 @@
         },
 
         _render: function () {
-            this.container = createElement("div.rs-container");
-            this.innerContainer = createElement("div.rs-inner-container");
-            this.block = createElement("div.rs-block rs-outer rs-border");
+            this.container = createElement('div.rs-container');
+            this.innerContainer = createElement('div.rs-inner-container');
+            this.block = createElement('div.rs-block rs-outer rs-border');
             this.container.append(this.innerContainer.append(this.block));
-            this.control.addClass("rs-control").empty().append(this.container);
+            this.control.addClass('rs-control').empty().append(this.container);
             this._setRadius();
 
             if (this._isBrowserSupport) {
+                this._blocks = [];
                 this._createLayers();
                 this._setProperties();
                 this._setValue();
                 this._updateTooltipPos();
-                this._bindControlEvents("_bind");
+                this._bindControlEvents('_bind');
                 this._checkIE();
             } else {
-                var msg = createElement("div.rs-msg");
-                msg.html(typeof this._throwError === "function" ? this._throwError() : this._throwError);
-                this.control.empty().addClass("rs-error").append(msg);
+                var msg = createElement('div.rs-msg');
+                msg.html(typeof this._throwError === 'function' ? this._throwError() : this._throwError);
+                this.control.empty().addClass('rs-error').append(msg);
+
                 if (this._isInputType) {
                     this.control.append(this._dataElement());
                 }
@@ -140,32 +143,43 @@
             this._validateSliderType();
             this._updateStartEnd();
             this._validateStartEnd();
-            this._handle1 = this._handle2 = this._handleDefaults();
             this._analyzeModelValue();
             this._validateModelValue();
         },
 
         _createLayers: function () {
             var padd = this.options.width;
-            var start = this._start, path;
-            path = createElement("div.rs-path rs-transition");
+            var start = this._start;
+            var path = createElement('div.rs-path rs-transition');
 
-            if (this._rangeSlider || this._showRange) {
-                this.block1 = path.clone().addClass("rs-range-color").rsRotate(start);
-                this.block2 = path.clone().addClass("rs-range-color").css("opacity", "0").rsRotate(start);
-                this.block3 = path.clone().addClass("rs-path-color").rsRotate(start);
-                this.block4 = path.addClass("rs-path-color").css({
-                    "opacity": "1",
-                    "z-index": "1"
-                }).rsRotate(start - 180);
+            if (this._multiRangeSlider || this._showRange) {
+                var block1;
+                var block2;
+                for (var i = 0; i < this._handles.length; i++) {
+                    block1 = path.clone().addClass('rs-range-color-' + i).rsRotate(start)
+                    block2 = path.clone().addClass('rs-path-color-' + i).rsRotate(start);
+                    this._blocks.push(block1);
+                    this._blocks.push(block2);
+                    this.block.append(block1)
+                    this.block.append(block2)
+                }
+                // todo
+                // this.block1 = path.clone().addClass('rs-range-color').rsRotate(start);
+                // this.block2 = path.clone().addClass('rs-range-color').css('opacity', '0').rsRotate(start);
+                // this.block3 = path.clone().addClass('rs-path-color').rsRotate(start);
+                // var lastBlock = path.addClass('rs-path-color').css({
+                //   'opacity': '1',
+                //   'z-index': '1'
+                // }).rsRotate(start - 180)
+                // this._blocks.push(lastBlock);
 
-                this.block.append(this.block1, this.block2, this.block3, this.block4).addClass("rs-split");
+                this.block.addClass('rs-split');
             } else {
-                this.block.append(path.addClass("rs-path-color"));
+                this.block.append(path.addClass('rs-path-color'));
             }
 
-            this.lastBlock = createElement("span.rs-block").css({ "padding": padd });
-            this.innerBlock = createElement("div.rs-inner rs-bg-color rs-border");
+            this.lastBlock = createElement('span.rs-block').css({ 'padding': padd });
+            this.innerBlock = createElement('div.rs-inner rs-bg-color rs-border');
             this.lastBlock.append(this.innerBlock);
             this.block.append(this.lastBlock);
             this._appendHandle();
@@ -190,7 +204,7 @@
             }
 
             if (this.options.mouseScrollAction) {
-                this._bindScrollEvents("_bind");
+                this._bindScrollEvents('_bind');
             }
         },
 
@@ -199,32 +213,33 @@
         },
 
         _setValue: function () {
-            if (this._rangeSlider) {
-                this._setHandleValue(1);
-                this._setHandleValue(2);
+            if (this._multiRangeSlider) {
+                for (var i = 0; i < this._handles.length; i++) {
+                    this._setHandleValue(i);
+                }
             } else {
                 if (this._showRange) {
-                    this._setHandleValue(1);
+                    this._setHandleValue(0);
                 }
 
-                var index = (this.options.sliderType == "default") ? (this._active || 1) : parseFloat(this.bar.children().attr("index"));
+                var index = (this.options.sliderType === 'default') ? (this._active || 0) : parseFloat(this.bar.children().attr('index'));
                 this._setHandleValue(index);
             }
         },
 
         _appendTooltip: function () {
-            if (this.container.children(".rs-tooltip").length !== 0) {
+            if (this.container.children('.rs-tooltip').length !== 0) {
                 return;
             }
 
-            this.tooltip = createElement("span.rs-tooltip rs-tooltip-text");
+            this.tooltip = createElement('span.rs-tooltip rs-tooltip-text');
             this.container.append(this.tooltip);
             this._tooltipEditable();
             this._updateTooltip();
         },
 
         _removeTooltip: function () {
-            if (this.container.children(".rs-tooltip").length == 0) {
+            if (this.container.children('.rs-tooltip').length === 0) {
                 return;
             }
 
@@ -238,56 +253,56 @@
 
             var hook;
             if (this.options.editableTooltip) {
-                this.tooltip.addClass("edit");
-                hook = "_bind";
+                this.tooltip.addClass('edit');
+                hook = '_bind';
             } else {
-                this.tooltip.removeClass("edit");
-                hook = "_unbind";
+                this.tooltip.removeClass('edit');
+                hook = '_unbind';
             }
 
-            this[hook](this.tooltip, "click", this._editTooltip);
+            this[hook](this.tooltip, 'click', this._editTooltip);
         },
 
         _editTooltip: function (e) {
-            if (!this.tooltip.hasClass("edit") || this._isReadOnly) {
+            if (!this.tooltip.hasClass('edit') || this._isReadOnly) {
                 return;
             }
 
-            var border = parseFloat(this.tooltip.css("border-left-width")) * 2;
-            this.input = createElement("input.rs-input rs-tooltip-text").css({
+            var border = parseFloat(this.tooltip.css('border-left-width')) * 2;
+            this.input = createElement('input.rs-input rs-tooltip-text').css({
                 height: this.tooltip.outerHeight() - border,
                 width: this.tooltip.outerWidth() - border
             });
-            this.tooltip.html(this.input).removeClass("edit").addClass("hover");
+            this.tooltip.html(this.input).removeClass('edit').addClass('hover');
 
             this.input.focus().val(this._getTooltipValue(true));
 
-            this._bind(this.input, "blur", this._focusOut);
-            this._bind(this.input, "change", this._focusOut);
+            this._bind(this.input, 'blur', this._focusOut);
+            this._bind(this.input, 'change', this._focusOut);
         },
 
         _focusOut: function (e) {
-            if (e.type == "change") {
-                this.options.value = this.input.val().replace("-", ",");
+            if (e.type === 'change') {
+                this.options.value = this.input.val().split(' - ').join(',');
                 this._analyzeModelValue();
                 this._validateModelValue();
                 this._setValue();
                 this.input.val(this._getTooltipValue(true));
             } else {
-                this.tooltip.addClass("edit").removeClass("hover");
+                this.tooltip.addClass('edit').removeClass('hover');
                 this._updateTooltip();
             }
 
-            this._raiseEvent("change");
+            this._raiseEvent('change');
         },
 
         _setHandleShape: function () {
             var type = this.options.handleShape;
-            this._handles().removeClass("rs-handle-dot rs-handle-square");
-            if (type == "dot") {
-                this._handles().addClass("rs-handle-dot");
-            } else if (type == "square") {
-                this._handles().addClass("rs-handle-square");
+            this._getHandles().removeClass('rs-handle-dot rs-handle-square');
+            if (type === 'dot') {
+                this._getHandles().addClass('rs-handle-dot');
+            } else if (type === 'square') {
+                this._getHandles().addClass('rs-handle-square');
             } else {
                 this.options.handleShape = this.defaults.handleShape;
             }
@@ -295,9 +310,9 @@
 
         _setHandleValue: function (index) {
             this._active = index;
-            var handle = this["_handle" + index];
+            var handle = this._handles[index];
 
-            if (this.options.sliderType != "min-range") {
+            if (this.options.sliderType !== 'min-range') {
                 this.bar = this._activeHandleBar();
             }
 
@@ -314,12 +329,12 @@
 
         _addAnimation: function () {
             if (this.options.animation) {
-                this.control.addClass("rs-animation");
+                this.control.addClass('rs-animation');
             }
         },
 
         _removeAnimation: function () {
-            this.control.removeClass("rs-animation");
+            this.control.removeClass('rs-animation');
         },
 
         _setRadius: function () {
@@ -328,34 +343,34 @@
             var circleShape = this.options.circleShape;
             var height = d;
             var width = d;
-            this.container.removeClass().addClass("rs-container");
+            this.container.removeClass().addClass('rs-container');
 
-            if (circleShape.indexOf("half") === 0) {
+            if (circleShape.indexOf('half') === 0) {
                 switch (circleShape) {
-                    case "half-top":
-                    case "half-bottom":
+                    case 'half-top':
+                    case 'half-bottom':
                         height = r;
                         width = d;
                         break;
-                    case "half-left":
-                    case "half-right":
+                    case 'half-left':
+                    case 'half-right':
                         height = d;
                         width = r;
                         break;
                 }
 
-                this.container.addClass(circleShape.replace("half-", "") + " half");
-            } else if (circleShape.indexOf("quarter") === 0) {
+                this.container.addClass(circleShape.replace('half-', '') + ' half');
+            } else if (circleShape.indexOf('quarter') === 0) {
                 height = width = r;
-                var s = circleShape.split("-");
-                this.container.addClass(s[0] + " " + s[1] + " " + s[2]);
+                var s = circleShape.split('-');
+                this.container.addClass(s[0] + ' ' + s[1] + ' ' + s[2]);
             } else {
-                this.container.addClass("full " + circleShape);
+                this.container.addClass('full ' + circleShape);
             }
 
             var style = {
-                "height": height,
-                "width": width
+                'height': height,
+                'width': width
             };
             this.control.css(style);
             this.container.css(style);
@@ -363,31 +378,27 @@
 
         _border: function (seperator) {
             if (seperator) {
-                return parseFloat(this._startLine.children().css("border-bottom-width"));
+                return parseFloat(this._startLine.children().css('border-bottom-width'));
             }
 
-            return parseFloat(this.block.css("border-top-width")) * 2;
+            return parseFloat(this.block.css('border-top-width')) * 2;
         },
 
         _appendHandle: function () {
-            if (this._rangeSlider || !this._showRange) {
-                this._createHandle(1);
+            if (this._multiRangeSlider) {
+                for (var i = 0; i < this._handles.length; i++) {
+                    this._createHandle(i);
+                }
             }
 
-            if (this._rangeSlider || this._showRange) {
-                this._createHandle(2);
-            }
-
-            this._startLine = this._addSeperator(this._start, "rs-start");
-            this._endLine = this._addSeperator(this._start + this._end, "rs-end");
+            this._startLine = this._addSeperator(this._start, 'rs-start');
+            this._endLine = this._addSeperator(this._start + this._end, 'rs-end');
             this._refreshSeperator();
         },
 
         _addSeperator: function (pos, cls) {
-            var line = createElement("span.rs-seperator rs-border");
-            var width = this.options.width;
-            var _border = this._border();
-            var lineWrap = createElement("span.rs-bar rs-transition " + cls).append(line).rsRotate(pos);
+            var line = createElement('span.rs-seperator rs-border');
+            var lineWrap = createElement('span.rs-bar rs-transition ' + cls).append(line).rsRotate(pos);
 
             this.container.append(lineWrap);
 
@@ -396,23 +407,23 @@
 
         _refreshSeperator: function () {
             var bars = this._startLine.add(this._endLine);
-            var seperators = bars.children().removeAttr("style");
+            var separators = bars.children().removeAttr('style');
             var opt = this.options;
             var width = opt.width;
             var _border = this._border();
             var size = width + _border;
 
-            if (opt.lineCap == "round" && opt.circleShape != "full") {
-                bars.addClass("rs-rounded");
-                seperators.css({ width: size, height: (size / 2) + 1 });
-                this._startLine.children().css("margin-top", -1).addClass(opt.sliderType == "min-range" ? "rs-range-color" : "rs-path-color");
-                this._endLine.children().css("margin-top", size / -2).addClass("rs-path-color");
+            if (opt.lineCap === 'round' && opt.circleShape !== 'full') {
+                bars.addClass('rs-rounded');
+                separators.css({ width: size, height: (size / 2) + 1 });
+                this._startLine.children().css('margin-top', -1).addClass(opt.sliderType === 'min-range' ? 'rs-range-color' : 'rs-path-color');
+                this._endLine.children().css('margin-top', size / -2).addClass('rs-path-color');
             } else {
-                bars.removeClass("rs-rounded");
-                seperators.css({
-                    "width": size,
-                    "margin-top": this._border(true) / -2
-                }).removeClass("rs-range-color rs-path-color");
+                bars.removeClass('rs-rounded');
+                separators.css({
+                    'width': size,
+                    'margin-top': this._border(true) / -2
+                }).removeClass('rs-range-color rs-path-color');
             }
         },
 
@@ -422,54 +433,72 @@
         },
 
         _createHandle: function (index) {
-            var handle = createElement("div.rs-handle rs-move");
-            var o = this.options;
-            var hs;
+            var handle = createElement('div.rs-handle rs-move');
+            var handleShape = this.options.handleShape;
 
-            if ((hs = o.handleShape) != "round") {
-                handle.addClass("rs-handle-" + hs);
+            if (handleShape !== 'round') {
+                handle.addClass('rs-handle-' + handleShape);
             }
 
-            handle.attr({ "index": index, "tabIndex": "0" });
+            handle.attr({ 'index': index, 'tabIndex': '0' });
 
             var id = this._dataElement()[0].id;
-            var id = id ? id + "_" : "";
-            var label = id + "handle" + (o.sliderType == "range" ? "_" + (index == 1 ? "start" : "end") : "");
+            var id = id ? id + '_' : '';
+            var label = id + 'handle';
 
-            handle.attr({ "role": "slider", "aria-label": label });     // WAI-ARIA support
+            if (this._multiRangeSlider) {
+                label += '_';
 
-            var bar = createElement("div.rs-bar rs-transition").css("z-index", "7").append(handle).rsRotate(this._start);
-            bar.addClass(o.sliderType == "range" && index == 2 ? "rs-second" : "rs-first");
+                if (index === 0) {
+                    label += 'start';
+                } else if (index === this._handles[this._handles.length - 1]) {
+                    label += 'end';
+                }
+            }
+
+            // WAI-ARIA support
+            handle.attr({ 'role': 'slider', 'aria-label': label });
+
+            var bar = createElement('div.rs-bar rs-transition').css('z-index', '7').append(handle).rsRotate(this._start);
+
+            // set custom class just if the user wants to style it
+            if (this._multiRangeSlider) {
+                bar.addClass('rs-index-' + index);
+            }
+
             this.container.append(bar);
             this._refreshHandle();
 
             this.bar = bar;
             this._active = index;
-            if (index != 1 && index != 2) {
-                this["_handle" + index] = this._handleDefaults();
+
+            if (typeof index === 'undefined') {
+                this._handles.push(this._handleDefaults());
             }
 
-            this._bind(handle, "focus", this._handleFocus);
-            this._bind(handle, "blur", this._handleBlur);
+            this._bind(handle, 'focus', this._handleFocus);
+            this._bind(handle, 'blur', this._handleBlur);
 
             return handle;
         },
 
         _refreshHandle: function () {
-            var hSize = this.options.handleSize, h, w, isSquare = true;
-            if (typeof hSize === "string" && isNumber(hSize)) {
-                if (hSize.charAt(0) === "+" || hSize.charAt(0) === "-") {
+            var hSize = this.options.handleSize;
+            var isSquare = true;
+
+            if (typeof hSize === 'string' && isNumber(hSize)) {
+                if (hSize.charAt(0) === '+' || hSize.charAt(0) === '-') {
                     try {
                         hSize = eval(this.options.width + hSize.charAt(0) + Math.abs(parseFloat(hSize)));
                     } catch (e) {
                         console.warn(e);
                     }
-                } else if (hSize.indexOf(",")) {
-                    var s = hSize.split(",");
+                } else if (hSize.indexOf(',')) {
+                    var s = hSize.split(',');
 
                     if (isNumber(s[0]) && isNumber(s[1])) {
-                        w = parseFloat(s[0]);
-                        h = parseFloat(s[1]);
+                        var w = parseFloat(s[0]);
+                        var h = parseFloat(s[1]);
                         isSquare = false;
                     }
                 }
@@ -480,7 +509,7 @@
             }
 
             var diff = (this.options.width + this._border() - w) / 2;
-            this._handles().css({ height: h, width: w, "margin": -h / 2 + "px 0 0 " + diff + "px" });
+            this._getHandles().css({ height: h, width: w, 'margin': -h / 2 + 'px 0 0 ' + diff + 'px' });
         },
 
         _handleDefaults: function () {
@@ -490,24 +519,24 @@
             };
         },
 
-        _handles: function () {
-            return this.container.children("div.rs-bar").find(".rs-handle");
+        _getHandles: function () {
+            return this.container.children('div.rs-bar').find('.rs-handle');
         },
 
         _activeHandleBar: function (index) {
-            index = (index != undefined) ? index : this._active;
+            index = (index !== undefined) ? index : this._active;
 
-            return $(this.container.children("div.rs-bar")[index - 1]);
+            return $(this.container.children('div.rs-bar')[index]);
         },
 
         _handleArgs: function (index) {
-            index = (index != undefined) ? index : this._active;
-            var _handle = this["_handle" + index];
+            index = (index !== undefined) ? index : this._active;
+            var _handle = this._handles[index];
 
             return {
                 element: this._activeHandleBar(index).children(),
                 index: index,
-                isActive: index == this._active,
+                isActive: index === this._active,
                 value: _handle ? _handle.value : null,
                 angle: _handle ? _handle.angle : null
             };
@@ -518,20 +547,20 @@
         },
 
         _raiseEvent: function (event) {
-            var preValue = this["_pre" + event];
+            var preValue = this['_pre' + event];
 
             if (preValue !== this.options.value) {
-                this["_pre" + event] = this.options.value;
+                this['_pre' + event] = this.options.value;
                 this._updateTooltip();
 
-                if ((event == "change") || (this._bindOnDrag && event == "drag")) {
+                if ((event === 'change') || (this._bindOnDrag && event === 'drag')) {
                     this._updateHidden();
                 }
 
                 return this._raise(event, {
                     value: this.options.value,
                     preValue: preValue,
-                    "handle": this._handleArgs()
+                    'handle': this._handleArgs()
                 });
             }
         },
@@ -544,9 +573,10 @@
 
             var $target = $(e.target);
 
-            if ($target.hasClass("rs-handle")) {
+            if ($target.hasClass('rs-handle')) {
                 this._handleDown(e);
             } else {
+                // grab the nearer handle
                 var point = this._getXY(e);
                 var center = this._getCenterPoint();
                 var distance = getdistance(point, center);
@@ -555,34 +585,35 @@
 
                 if (distance >= innerDistance && distance <= outerDistance) {
                     e.preventDefault();
-                    var handle = this.control.find(".rs-handle.rs-focus");
+                    // var handle = this.control.find('.rs-handle.rs-focus');
                     var angle;
                     var value;
-                    //if (handle.length == 0)
-                    this.control.attr("tabindex", "0").focus().removeAttr("tabindex");
+                    this.control.attr('tabindex', '0').focus().removeAttr('tabindex');
 
-                    if ($target.hasClass("rs-seperator")) {
-                        value = $target.parent().hasClass("rs-start") ? this.options.min : this.options.max;
+                    if ($target.hasClass('rs-seperator')) {
+                        value = $target.parent().hasClass('rs-start') ? this.options.min : this.options.max;
                         angle = this._valueToAngle(value);
                     } else {
                         var d = this._getAngleValue(point, center);
-                        angle = d.angle, value = d.value;
+                        angle = d.angle;
+                        value = d.value;
                     }
 
-                    if (this._rangeSlider) {
-                        handle = this.control.find(".rs-handle.rs-focus");
+                    if (this._multiRangeSlider) {
+                        var handles = this.control.find('.rs-handle.rs-focus');
 
-                        if (handle.length == 1) {
-                            this._active = parseFloat(handle.attr("index"));
+                        if (handles.length === 1) {
+                            this._active = parseFloat(handles.attr('index'));
                         } else {
-                            this._active = (this._handle2.value - value) < (value - this._handle1.value) ? 2 : 1;
+                            // get closest handle
+                            this._active = this._closestIndex(this._handles, value, 'value');
                         }
 
                         this.bar = this._activeHandleBar();
                     }
 
                     this._changeSliderValue(value, angle);
-                    this._raiseEvent("change");
+                    this._raiseEvent('change');
                 }
             }
         },
@@ -591,14 +622,15 @@
             e.preventDefault();
             var $target = $(e.target);
             $target.focus();
+
             this._removeAnimation();
-            this._bindMouseEvents("_bind");
+            this._bindMouseEvents('_bind');
             this.bar = $target.parent();
-            this._active = parseFloat($target.attr("index"));
-            this._handles().removeClass("rs-move");
-            this._raise("start", {
+            this._active = parseFloat($target.attr('index'));
+            this._getHandles().removeClass('rs-move');
+            this._raise('start', {
                 value: this.options.value,
-                "handle": this._handleArgs()
+                'handle': this._handleArgs()
             });
         },
 
@@ -611,17 +643,17 @@
             var value = d.value;
 
             this._changeSliderValue(value, angle);
-            this._raiseEvent("drag");
+            this._raiseEvent('drag');
         },
 
         _handleUp: function (e) {
-            this._handles().addClass("rs-move");
-            this._bindMouseEvents("_unbind");
+            this._getHandles().addClass('rs-move');
+            this._bindMouseEvents('_unbind');
             this._addAnimation();
-            this._raiseEvent("change");
-            this._raise("stop", {
+            this._raiseEvent('change');
+            this._raise('stop', {
                 value: this.options.value,
-                "handle": this._handleArgs()
+                'handle': this._handleArgs()
             });
         },
 
@@ -631,26 +663,26 @@
             }
 
             var $target = $(e.target);
-            this._handles().removeClass("rs-focus");
-            $target.addClass("rs-focus");
+            this._getHandles().removeClass('rs-focus');
+            $target.addClass('rs-focus');
             this.bar = $target.parent();
-            this._active = parseFloat($target.attr("index"));
+            this._active = parseFloat($target.attr('index'));
 
             if (this.options.keyboardAction) {
-                this._bindKeyboardEvents("_unbind");
-                this._bindKeyboardEvents("_bind");
+                this._bindKeyboardEvents('_unbind');
+                this._bindKeyboardEvents('_bind');
             }
 
             // updates the class for change z-index
-            this.control.find("div.rs-bar").css("z-index", "7");
-            this.bar.css("z-index", "8");
+            this.control.find('div.rs-bar').css('z-index', '7');
+            this.bar.css('z-index', '8');
         },
 
         _handleBlur: function (e) {
-            this._handles().removeClass("rs-focus");
+            this._getHandles().removeClass('rs-focus');
 
             if (this.options.keyboardAction) {
-                this._bindKeyboardEvents("_unbind");
+                this._bindKeyboardEvents('_unbind');
             }
         },
 
@@ -660,8 +692,8 @@
             }
 
             var key = e.keyCode;
-            if (key == 27) {
-                this._handles().blur();
+            if (key === 27) {
+                this._getHandles().blur();
             }
 
             if (!(key >= 35 && key <= 40)) {
@@ -672,28 +704,27 @@
                 this._removeAnimation();
             }
 
-            var h = this["_handle" + this._active];
+            var handle = this._handles[this._active];
             var val;
-            var ang;
 
             e.preventDefault();
-            if (key == 38 || key == 37) {
+            if (key === 38 || key === 37) {
                 // Up || Left Key
-                val = this._round(this._limitValue(h.value + this.options.step));
-            } else if (key == 39 || key == 40) {
+                val = this._round(this._limitValue(handle.value + this.options.step));
+            } else if (key === 39 || key === 40) {
                 // Right || Down Key
-                val = this._round(this._limitValue(h.value - this._getMinusStep(h.value)));
-            } else if (key == 36) {
+                val = this._round(this._limitValue(handle.value - this._getMinusStep(handle.value)));
+            } else if (key === 36) {
                 // Home Key
-                val = this._getKeyValue("Home");
-            } else if (key == 35) {
+                val = this._getKeyValue('Home');
+            } else if (key === 35) {
                 // End Key
-                val = this._getKeyValue("End");
+                val = this._getKeyValue('End');
             }
 
-            ang = this._valueToAngle(val);
+            var ang = this._valueToAngle(val);
             this._changeSliderValue(val, ang);
-            this._raiseEvent("change");
+            this._raiseEvent('change');
         },
 
         _handleKeyUp: function (e) {
@@ -701,10 +732,10 @@
         },
 
         _getMinusStep: function (val) {
-            if (val == this.options.max) {
+            if (val === this.options.max) {
                 var step = (this.options.max - this.options.min) % this.options.step;
 
-                return step == 0 ? this.options.step : step;
+                return step === 0 ? this.options.step : step;
             }
 
             return this.options.step;
@@ -712,14 +743,14 @@
 
         _getKeyValue: function (key) {
             if (this._rangeSlider) {
-                if (key == "Home") {
-                    return (this._active == 1) ? this.options.min : this._handle1.value;
+                if (key === 'Home') {
+                    return (this._active === 0) ? this.options.min : this._handles[0].value;
                 } else {
-                    return (this._active == 1) ? this._handle2.value : this.options.max;
+                    return (this._active === 0) ? this._handles[this._handles.length - 1].value : this.options.max;
                 }
             }
 
-            return (key == "Home") ? this.options.min : this.options.max;
+            return (key === 'Home') ? this.options.min : this.options.max;
         },
 
         _elementScroll: function (event) {
@@ -730,57 +761,57 @@
             var e = event.originalEvent || event;
             var delta = e.wheelDelta ? e.wheelDelta / 60 : (e.detail ? -e.detail / 2 : 0);
 
-            if (delta == 0) {
+            if (delta === 0) {
                 return;
             }
 
             this._updateActiveHandle(event);
-            var h = this["_handle" + this._active];
+            var h = this['_handle' + this._active];
             var val = h.value + (delta > 0 ? this.options.step : -this._getMinusStep(h.value));
             val = this._limitValue(val);
             var ang = this._valueToAngle(val);
 
             this._removeAnimation();
             this._changeSliderValue(val, ang);
-            this._raiseEvent("change");
+            this._raiseEvent('change');
             this._addAnimation();
         },
 
         _updateActiveHandle: function (e) {
             var $target = $(e.target);
 
-            if ($target.hasClass("rs-handle") && $target.parent().parent()[0] == this.control[0]) {
+            if ($target.hasClass('rs-handle') && $target.parent().parent()[0] === this.control[0]) {
                 this.bar = $target.parent();
-                this._active = parseFloat($target.attr("index"));
+                this._active = parseFloat($target.attr('index'));
             }
 
-            if (!this.bar.find(".rs-handle").hasClass("rs-focus")) {
-                this.bar.find(".rs-handle").focus();
+            if (!this.bar.find('.rs-handle').hasClass('rs-focus')) {
+                this.bar.find('.rs-handle').focus();
             }
         },
 
         // Events binding
         _bindControlEvents: function (hook) {
-            this[hook](this.control, "mousedown", this._elementDown);
-            this[hook](this.control, "touchstart", this._elementDown);
+            this[hook](this.control, 'mousedown', this._elementDown);
+            this[hook](this.control, 'touchstart', this._elementDown);
         },
         _bindScrollEvents: function (hook) {
-            this[hook](this.control, "mousewheel", this._elementScroll);
-            this[hook](this.control, "DOMMouseScroll", this._elementScroll);
+            this[hook](this.control, 'mousewheel', this._elementScroll);
+            this[hook](this.control, 'DOMMouseScroll', this._elementScroll);
         },
         _bindMouseEvents: function (hook) {
-            this[hook]($(document), "mousemove", this._handleMove);
-            this[hook]($(document), "mouseup", this._handleUp);
-            this[hook]($(document), "mouseleave", this._handleUp);
+            this[hook]($(document), 'mousemove', this._handleMove);
+            this[hook]($(document), 'mouseup', this._handleUp);
+            this[hook]($(document), 'mouseleave', this._handleUp);
 
             // *** for Touch support *** //
-            this[hook]($(document), "touchmove", this._handleMove);
-            this[hook]($(document), "touchend", this._handleUp);
-            this[hook]($(document), "touchcancel", this._handleUp);
+            this[hook]($(document), 'touchmove', this._handleMove);
+            this[hook]($(document), 'touchend', this._handleUp);
+            this[hook]($(document), 'touchcancel', this._handleUp);
         },
         _bindKeyboardEvents: function (hook) {
-            this[hook]($(document), "keydown", this._handleKeyDown);
-            this[hook]($(document), "keyup", this._handleKeyUp);
+            this[hook]($(document), 'keydown', this._handleKeyDown);
+            this[hook]($(document), 'keyup', this._handleKeyUp);
         },
 
         // internal methods
@@ -788,64 +819,114 @@
             var oAngle = this._oriAngle(angle);
             var lAngle = this._limitAngle(angle);
 
-            if (!this._rangeSlider && !this._showRange) {
-                this["_handle" + this._active] = { angle: angle, value: value };
+            if (this._multiRangeSlider) {
+                var n = oAngle;
+                var n1 = this._oriAngle(this._handles[this._modulo(this._active + 1, this._handles.length)].angle);
+                var nn = this._oriAngle(this._handles[this._modulo(this._active + this._handles.length - 1, this._handles.length)].angle);
+                var assert = n1 > nn ? !(n > n1 || n < nn) : !(n > n1 && n < nn);
+                // var assert = true;
+                // var n1;
+                // var n2;
+                //
+                // for (var i = 0; i < this._handles.length; i++) {
+                //   n1 = this._oriAngle(this._handles[this._modulo(i, this._handles.length)].angle);
+                //   n2 = this._oriAngle(this._handles[this._modulo(i + 1, this._handles.length)].angle);
+                //   assert = assert && (n1 < n2);
+                // }
+                // assert = assert && (n < n2);
+            }
+
+            if (!this._multiRangeSlider && !this._showRange) {
+                this._handles[this._active] = { angle: angle, value: value };
                 this.options.value = value;
                 this.bar.rsRotate(lAngle);
                 this._updateARIA(value);
             } else if (
-                (this._active == 1 && oAngle <= this._oriAngle(this._handle2.angle)) ||
-                (this._active == 2 && oAngle >= this._oriAngle(this._handle1.angle)) ||
-                this._invertRange
+                // limit moves of the handles
+            // (this._active === 0 || this._active === this._handles.length - 1) &&
+            // ((oAngle >= this._oriAngle(this._handles[this._modulo(this._active - 1, this._handles.length)].angle)) ||
+            // (oAngle <= this._oriAngle(this._handles[this._modulo(this._active + 1, this._handles.length)].angle))) ||
+
+            // !(this._active === 0 || this._active === this._handles.length - 1) &&
+            // (oAngle >= this._modulo((this._oriAngle(this._handles[this._modulo(this._active - 1, this._handles.length)].angle) - 360), 360)) &&
+            // (oAngle <= this._modulo((oAngle !== this._oriAngle(this._handles[this._modulo(this._active + 1, this._handles.length)].angle)), 360))
+            // ( n < n1 && n1 < n2) || (n > n1 && n1 < n2 && n > n2) || (n < n1 && n2 < n && n2 < n1) // todo for 3 elements only
+                assert
             ) {
-                this["_handle" + this._active] = { angle: angle, value: value };
-                this.options.value = this._rangeSlider ? this._handle1.value + "," + this._handle2.value : value;
+                this._handles[this._active] = { angle: angle, value: value };
+
+                console.log(this._active);
+                if (this._multiRangeSlider) {
+                    this.options.value = '';
+
+                    for (var i = 0; i < this._handles.length; i++) {
+                        if (i === 0) {
+                            this.options.value += this._handles[i].value;
+                        } else {
+                            this.options.value += ',' + this._handles[i].value;
+                        }
+                    }
+                } else {
+                    this.options.value = value;
+                }
+
                 this.bar.rsRotate(lAngle);
                 this._updateARIA(value);
 
-                var dAngle = this._oriAngle(this._handle2.angle) - this._oriAngle(this._handle1.angle);
-                var o2 = "1";
-                var o3 = "0";
+                // for (var i = 0; i < this._handles.length; i++) {
 
-                if (dAngle <= 180 && !(dAngle < 0 && dAngle > -180)) {
-                    o2 = "0", o3 = "1";
-                }
+                // todo be generic
+                // var dAngle = this._oriAngle(this._handles[2].angle) - this._oriAngle(this._handles[1].angle);
+                // var o2 = '1';
+                // var o3 = '0';
+                //
+                // if (dAngle <= 180 && !(dAngle < 0 && dAngle > -180)) {
+                //   o2 = '0';
+                //   o3 = '1';
+                // }
+                //
+                // this.block2.css('opacity', o2);
+                // this.block3.css('opacity', o3);
 
-                this.block2.css("opacity", o2);
-                this.block3.css("opacity", o3);
-
-                (this._active == 1 ? this.block4 : this.block2).rsRotate(lAngle - 180);
-                (this._active == 1 ? this.block1 : this.block3).rsRotate(lAngle);
+                // rotate propers paths
+                // for (var i = 0; i < this._blocks.length - 1; i++) {
+                this._blocks[2 * this._active].rsRotate(lAngle);
+                this._blocks[2 * this._active + 1].rsRotate(lAngle - 180);
+                // }
+                // (this._active === 0 ? this.block4 : this.block2).rsRotate(lAngle - 180);
+                // (this._active === 0 ? this.block1 : this.block3).rsRotate(lAngle);
+                // }
             }
         },
 
         // WAI-ARIA support
         _updateARIA: function (value) {
-            var min = this.options.min, max = this.options.max;
-            this.bar.children().attr({ "aria-valuenow": value });
+            var min = this.options.min
+            var max = this.options.max;
+            this.bar.children().attr({ 'aria-valuenow': value });
 
-            if (this.options.sliderType == "range") {
-                var handles = this._handles();
-                handles.eq(0).attr({ "aria-valuemin": min });
-                handles.eq(1).attr({ "aria-valuemax": max });
+            if (this._multiRangeSlider) {
+                var handles = this._getHandles();
+                handles.eq(0).attr({ 'aria-valuemin': min });
+                handles.eq(handles.length - 1).attr({ 'aria-valuemax': max });
 
-                if (this._active == 1) {
-                    handles.eq(1).attr({ "aria-valuemin": value });
+                if (this._active === 1) {
+                    handles.eq(handles.length - 1).attr({ 'aria-valuemin': value });
                 } else {
-                    handles.eq(0).attr({ "aria-valuemax": value });
+                    handles.eq(0).attr({ 'aria-valuemax': value });
                 }
             } else {
-                this.bar.children().attr({ "aria-valuemin": min, "aria-valuemax": max });
+                this.bar.children().attr({ 'aria-valuemin': min, 'aria-valuemax': max });
             }
         },
 
         // Listener for KO binding
         _checkKO: function () {
             var _data = this._dataElement().data("bind");
-            if (typeof _data == "string" && typeof ko == "object") {
+            if (typeof _data === "string" && typeof ko === "object") {
                 var _vm = ko.dataFor(this._dataElement()[0]);
 
-                if (typeof _vm == "undefined") {
+                if (typeof _vm === "undefined") {
                     return true;
                 }
 
@@ -853,7 +934,7 @@
                 var _handler;
                 for (var i = 0; i < _all.length; i++) {
                     var d = _all[i].split(":");
-                    if ($.trim(d[0]) == "value") {
+                    if ($.trim(d[0]) === "value") {
                         _handler = $.trim(d[1]);
                         break;
                     }
@@ -869,10 +950,10 @@
 
         // Listener for Angular binding
         _checkAngular: function () {
-            if (typeof angular == "object" && typeof angular.element == "function") {
+            if (typeof angular === "object" && typeof angular.element === "function") {
                 this._ngName = this._dataElement().attr("ng-model");
 
-                if (typeof this._ngName == "string") {
+                if (typeof this._ngName === "string") {
                     this._isAngular = true;
                     var that = this;
                     this._scope().$watch(this._ngName, function (newValue, oldValue) {
@@ -887,7 +968,7 @@
         },
 
         _getXY: function (e) {
-            if (e.type.indexOf("mouse") == -1) {
+            if (e.type.indexOf('mouse') === -1) {
                 e = (e.originalEvent || e).changedTouches[0];
             }
 
@@ -918,7 +999,7 @@
 
         _checkAngle: function (angle, isDrag) {
             var o_angle = this._oriAngle(angle)
-            var preAngle = this["_handle" + this._active].angle;
+            var preAngle = this._handles[this._active].angle;
             var o_preAngle = this._oriAngle(preAngle);
 
             if (o_angle > this._end) {
@@ -928,6 +1009,7 @@
                 angle = this._start + (o_preAngle <= this._end - o_preAngle ? 0 : this._end);
             } else if (isDrag) {
                 var d = this._handleDragDistance;
+
                 if (isNumber(d)) if (Math.abs(o_angle - o_preAngle) > d) {
                     return preAngle;
                 }
@@ -967,7 +1049,7 @@
         },
 
         _round: function (val) {
-            var s = this.options.step.toString().split(".");
+            var s = this.options.step.toString().split('.');
 
             return s[1] ? parseFloat(val.toFixed(s[1].length)) : Math.round(val);
         },
@@ -1007,21 +1089,44 @@
         },
 
         _angleToValue: function (angle) {
-            var m = this.options;
-
-            return (this._oriAngle(angle) / this._end) * (m.max - m.min) + m.min;
+            return (this._oriAngle(angle) / this._end) * (this.options.max - this.options.min) + this.options.min;
         },
 
         _valueToAngle: function (value) {
-            var m = this.options;
+            var options = this.options;
 
-            return (((value - m.min) / (m.max - m.min)) * this._end) + this._start;
+            return (((value - options.min) / (options.max - options.min)) * this._end) + this._start;
+        },
+
+        _modulo: function (n, m) {
+            return ((n % m) + m) % m;
+        },
+
+        _closestIndex: function (array, num, key) {
+            var i = 0;
+            var minDiff = 1000;
+            var ans;
+
+            for (i in array) {
+                if (key) {
+                    var m = Math.abs(num - array[i][key]);
+                } else {
+                    var m = Math.abs(num - array[i]);
+                }
+
+                if (m < minDiff) {
+                    minDiff = m;
+                    ans = i;
+                }
+            }
+
+            return parseInt(ans);
         },
 
         _appendHiddenField: function () {
-            this._hiddenField = this._hiddenField || createElement("input");
+            this._hiddenField = this._hiddenField || createElement('input');
             this._hiddenField.attr({
-                "type": "hidden", "name": this._dataElement()[0].id || ""
+                'type': 'hidden', 'name': this._dataElement()[0].id || ''
             });
             this.control.append(this._hiddenField);
             this._updateHidden();
@@ -1032,7 +1137,7 @@
             this._hiddenField.val(val);
 
             if (this._isKO || this._isAngular) {
-                this._hiddenField.trigger("change");
+                this._hiddenField.trigger('change');
             }
 
             if (this._isAngular) {
@@ -1041,7 +1146,7 @@
         },
 
         _updateTooltip: function () {
-            if (this.tooltip && !this.tooltip.hasClass("hover")) {
+            if (this.tooltip && !this.tooltip.hasClass('hover')) {
                 this.tooltip.html(this._getTooltipValue());
             }
 
@@ -1053,22 +1158,23 @@
         },
 
         _getTooltipPos: function () {
-            var circleShape = this.options.circleShape, pos;
+            var circleShape = this.options.circleShape
+            var pos;
 
-            if (circleShape == "full" || circleShape == "pie" || circleShape.indexOf("custom") === 0) {
+            if (circleShape === 'full' || circleShape === 'pie' || circleShape.indexOf('custom') === 0) {
                 return {
-                    "margin-top": -this.tooltip.outerHeight() / 2,
-                    "margin-left": -this.tooltip.outerWidth() / 2
+                    'margin-top': -this.tooltip.outerHeight() / 2,
+                    'margin-left': -this.tooltip.outerWidth() / 2
                 };
-            } else if (circleShape.indexOf("half") != -1) {
+            } else if (circleShape.indexOf('half') !== -1) {
                 switch (circleShape) {
-                    case "half-top":
-                    case "half-bottom":
-                        pos = { "margin-left": -this.tooltip.outerWidth() / 2 };
+                    case 'half-top':
+                    case 'half-bottom':
+                        pos = { 'margin-left': -this.tooltip.outerWidth() / 2 };
                         break;
-                    case "half-left":
-                    case "half-right":
-                        pos = { "margin-top": -this.tooltip.outerHeight() / 2 };
+                    case 'half-left':
+                    case 'half-right':
+                        pos = { 'margin-top': -this.tooltip.outerHeight() / 2 };
                         break;
                 }
 
@@ -1079,13 +1185,32 @@
         },
 
         _getTooltipValue: function (isNormal) {
-            if (this._rangeSlider) {
-                var p = this.options.value.split(",");
+            if (this._multiRangeSlider) {
+                var parts = this.options.value.split(',');
+
                 if (isNormal) {
-                    return p[0] + " - " + p[1];
+                    var result = ''
+                    for (var i = 0; i < parts.length; i++) {
+                        if (i === 0) {
+                            result += parts[i]
+                        } else {
+                            result += ' - ' + parts[i]
+                        }
+                    }
+
+                    return result;
                 }
 
-                return this._tooltipValue(p[0], 1) + " - " + this._tooltipValue(p[1], 2);
+                var result = ''
+                for (var i = 0; i < parts.length; i++) {
+                    if (i === 0) {
+                        result += this._tooltipValue(parts[i], i);
+                    } else {
+                        result += ' - ' + this._tooltipValue(parts[i], i)
+                    }
+                }
+
+                return result;
             }
 
             if (isNormal) {
@@ -1096,12 +1221,12 @@
         },
 
         _tooltipValue: function (value, index) {
-            var val = this._raise("tooltipFormat", {
+            var val = this._raise('tooltipFormat', {
                 value: value,
-                "handle": this._handleArgs(index)
+                'handle': this._handleArgs(index)
             });
 
-            return (val != null && typeof val !== "boolean") ? val : value;
+            return (val !== null && typeof val !== 'boolean') ? val : value;
         },
 
         _validateStartAngle: function () {
@@ -1119,7 +1244,7 @@
 
         _validateEndAngle: function () {
             var end = this.options.endAngle;
-            if (typeof end === "string" && isNumber(end) && (end.charAt(0) === "+" || end.charAt(0) === "-")) {
+            if (typeof end === 'string' && isNumber(end) && (end.charAt(0) === '+' || end.charAt(0) === '-')) {
                 try {
                     end = eval(this.options.startAngle + end.charAt(0) + Math.abs(parseFloat(end)));
                 }
@@ -1138,21 +1263,21 @@
 
         _refreshCircleShape: function () {
             var circleShape = this.options.circleShape;
-            var circel_shapes = ["half-top", "half-bottom", "half-left", "half-right",
-                "quarter-top-left", "quarter-top-right", "quarter-bottom-right", "quarter-bottom-left",
-                "pie", "custom-half", "custom-quarter"];
-            var shape_codes = ["h1", "h2", "h3", "h4", "q1", "q2", "q3", "q4", "3/4", "ch", "cq"];
+            var circel_shapes = ['half-top', 'half-bottom', 'half-left', 'half-right',
+                'quarter-top-left', 'quarter-top-right', 'quarter-bottom-right', 'quarter-bottom-left',
+                'pie', 'custom-half', 'custom-quarter'];
+            var shape_codes = ['h1', 'h2', 'h3', 'h4', 'q1', 'q2', 'q3', 'q4', '3/4', 'ch', 'cq'];
 
-            if (circel_shapes.indexOf(circleShape) == -1) {
+            if (circel_shapes.indexOf(circleShape) === -1) {
                 var index = shape_codes.indexOf(circleShape);
-                if (index != -1) {
+                if (index !== -1) {
                     circleShape = circel_shapes[index];
-                } else if (circleShape == "half") {
-                    circleShape = "half-top";
-                } else if (circleShape == "quarter") {
-                    circleShape = "quarter-top-left";
+                } else if (circleShape === 'half') {
+                    circleShape = 'half-top';
+                } else if (circleShape === 'quarter') {
+                    circleShape = 'quarter-top-left';
                 } else {
-                    circleShape = "full";
+                    circleShape = 'full';
                 }
             }
 
@@ -1161,13 +1286,13 @@
 
         _appendOverlay: function () {
             var shape = this.options.circleShape;
-            if (shape == "pie") {
-                this._checkOverlay(".rs-overlay", 270);
-            } else if (shape == "custom-half" || shape == "custom-quarter") {
-                this._checkOverlay(".rs-overlay1", 180);
+            if (shape === 'pie') {
+                this._checkOverlay('.rs-overlay', 270);
+            } else if (shape === 'custom-half' || shape === 'custom-quarter') {
+                this._checkOverlay('.rs-overlay1', 180);
 
-                if (shape == "custom-quarter") {
-                    this._checkOverlay(".rs-overlay2", this._end);
+                if (shape === 'custom-quarter') {
+                    this._checkOverlay('.rs-overlay2', this._end);
                 }
             }
         },
@@ -1175,8 +1300,8 @@
         _checkOverlay: function (cls, angle) {
             var overlay = this.container.children(cls);
 
-            if (overlay.length == 0) {
-                overlay = createElement("div" + cls + " rs-transition rs-bg-color");
+            if (overlay.length === 0) {
+                overlay = createElement('div' + cls + ' rs-transition rs-bg-color');
                 this.container.append(overlay);
             }
 
@@ -1205,28 +1330,28 @@
             for (i in props.booleanType) {
                 prop = props.booleanType[i];
                 value = m[prop];
-                m[prop] = (value == "false") ? false : !!value;
+                m[prop] = (value === 'false') ? false : !!value;
             }
 
             // to check boolean datatype
             for (i in props.stringType) {
                 prop = props.stringType[i];
                 value = m[prop];
-                m[prop] = ("" + value).toLowerCase();
+                m[prop] = ('' + value).toLowerCase();
             }
         },
 
         _validateSliderType: function () {
             var type = this.options.sliderType.toLowerCase();
-            this._rangeSlider = this._showRange = false;
+            this._multiRangeSlider = this._showRange = false;
 
-            if (type == "range") {
-                this._rangeSlider = this._showRange = true;
-            } else if (type.indexOf("min") != -1) {
+            if (type === 'multi-range') {
+                this._multiRangeSlider = this._showRange = true;
+            } else if (type.indexOf('min') !== -1) {
                 this._showRange = true;
-                type = "min-range";
+                type = 'min-range';
             } else {
-                type = "default";
+                type = 'default';
             }
 
             this.options.sliderType = type;
@@ -1234,22 +1359,22 @@
 
         _updateStartEnd: function () {
             var circle = this.options.circleShape;
-            if (circle != "full") {
-                if (circle.indexOf("quarter") != -1) {
-                    this.options.endAngle = "+90";
-                } else if (circle.indexOf("half") != -1) {
-                    this.options.endAngle = "+180";
-                } else if (circle == "pie") {
-                    this.options.endAngle = "+270";
+            if (circle !== 'full') {
+                if (circle.indexOf('quarter') !== -1) {
+                    this.options.endAngle = '+90';
+                } else if (circle.indexOf('half') !== -1) {
+                    this.options.endAngle = '+180';
+                } else if (circle === 'pie') {
+                    this.options.endAngle = '+270';
                 }
 
-                if (circle == "quarter-top-left" || circle == "half-top") {
+                if (circle === 'quarter-top-left' || circle === 'half-top') {
                     this.options.startAngle = 0;
-                } else if (circle == "quarter-top-right" || circle == "half-right") {
+                } else if (circle === 'quarter-top-right' || circle === 'half-right') {
                     this.options.startAngle = 90;
-                } else if (circle == "quarter-bottom-right" || circle == "half-bottom") {
+                } else if (circle === 'quarter-bottom-right' || circle === 'half-bottom') {
                     this.options.startAngle = 180;
-                } else if (circle == "quarter-bottom-left" || circle == "half-left") {
+                } else if (circle === 'quarter-bottom-left' || circle === 'half-left') {
                     this.options.startAngle = 270;
                 }
             }
@@ -1273,20 +1398,38 @@
             if (val instanceof Array) {
                 val = val.toString();
             }
-            var parts = (typeof val == "string") ? val.split(",") : [val];
 
-            if (this._rangeSlider) {
-                if (typeof val == "string") {
+            var parts = (typeof val === 'string') ? val.split(',') : [val];
+
+            this._handles = [];
+            for (var i = 0; i < parts.length; i++) {
+                this._handles.push(this._handleDefaults());
+            }
+
+            if (this._multiRangeSlider) {
+                if (typeof val === 'string') {
                     if (parts.length >= 2) {
-                        t = (isNumber(parts[0]) ? parts[0] : min) + "," + (isNumber(parts[1]) ? parts[1] : max);
+                        t = '';
+                        parts.sort(function (a, b) {
+                            return a.localeCompare(b);
+                        });
+                        for (var i = 0; i < parts.length; i++) {
+                            // set the max as a default for the last value
+                            if (i === parts.length - 1) {
+                                t += (isNumber(parts[i]) ? parts[i] : max);
+                            } else {
+                                // set the min as a default for the all other values
+                                t += (isNumber(parts[i]) ? parts[i] : min) + ',';
+                            }
+                        }
                     } else {
-                        t = isNumber(parts[0]) ? min + "," + parts[0] : min + "," + min;
+                        t = isNumber(parts[0]) ? min + ',' + parts[0] : min + ',' + min;
                     }
                 } else {
-                    t = isNumber(val) ? min + "," + val : min + "," + min;
+                    t = isNumber(val) ? min + ',' + val : min + ',' + min;
                 }
             } else {
-                if (typeof val == "string") {
+                if (typeof val === 'string') {
                     last = parts.pop()
                     t = isNumber(last) ? parseFloat(last) : min;
                 } else {
@@ -1299,31 +1442,44 @@
 
         _validateModelValue: function () {
             var val = this.options.value;
+            var value;
 
-            if (this._rangeSlider) {
-                var parts = val.split(",");
-                var val1 = parseFloat(parts[0]);
-                var val2 = parseFloat(parts[1]);
+            if (this._multiRangeSlider) {
+                var parts = val.split(',');
+                var optionValue = '';
 
-                val1 = this._limitValue(val1);
-                val2 = this._limitValue(val2);
+                // array already sorted
+                // var val1 = parseFloat(parts[0]);
+                // var val2 = parseFloat(parts[parts.length - 1]);
 
-                if (!this._invertRange && val1 > val2) {
-                    val2 = val1;
+                // val1 = this._limitValue(val1);
+                // val2 = this._limitValue(val2);
+
+                // limit values between min and max
+                for (var i = 0; i < parts.length; i++) {
+                    value = this._limitValue(parseFloat(parts[i]));
+                    this._handles[i] = this._processStepByValue(value);
+
+                    if (i === 0) {
+                        optionValue += this._handles[i].value;
+                    } else {
+                        optionValue += ',' + this._handles[i].value;
+                    }
                 }
 
-                this._handle1 = this._processStepByValue(val1);
-                this._handle2 = this._processStepByValue(val2);
-                this.options.value = this._handle1.value + "," + this._handle2.value;
+                // this._handle1 = this._processStepByValue(val1);
+                // this._handle2 = this._processStepByValue(val2);
+                // this.options.value = this._handle1.value + ',' + this._handle2.value;
+                this.options.value = optionValue;
             } else {
-                var index = this._showRange ? 2 : (this._active || 1);
-                this["_handle" + index] = this._processStepByValue(this._limitValue(val));
+                var index = this._showRange ? 1 : (this._active || 0);
+                this._handles[index] = this._processStepByValue(this._limitValue(val));
 
                 if (this._showRange) {
-                    this._handle1 = this._handleDefaults();
+                    this._handles[0] = this._handleDefaults();
                 }
 
-                this.options.value = this["_handle" + index].value;
+                this.options.value = this._handles[index].value;
             }
         },
 
@@ -1346,7 +1502,7 @@
             var ua = window.navigator.userAgent;
 
             if (ua.indexOf('MSIE ') >= 0 || ua.indexOf('Trident/') >= 0) {
-                this.control.css({ "-ms-touch-action": "none", "touch-action": "none" });
+                this.control.css({ '-ms-touch-action': 'none', 'touch-action': 'none' });
             }
         },
 
@@ -1356,12 +1512,12 @@
             var val = true;
 
             args = args || { value: o.value };
-            args["options"] = o;
+            args['options'] = o;
 
             if (fn) {
-                args["type"] = event;
+                args['type'] = event;
 
-                if (typeof fn === "string") {
+                if (typeof fn === 'string') {
                     fn = window[fn];
                 }
 
@@ -1418,9 +1574,9 @@
         },
         _readOnly: function (bool) {
             this._isReadOnly = bool;
-            this.container.removeClass("rs-readonly");
+            this.container.removeClass('rs-readonly');
             if (bool) {
-                this.container.addClass("rs-readonly");
+                this.container.addClass('rs-readonly');
             }
         },
 
@@ -1431,18 +1587,18 @@
 
         _set: function (property, value) {
             var props = this._props();
-            if ($.inArray(property, props.numberType) != -1) {          // to check number datatype
+            if ($.inArray(property, props.numberType) !== -1) {          // to check number datatype
                 if (!isNumber(value)) {
                     return;
                 }
                 value = parseFloat(value);
-            } else if ($.inArray(property, props.booleanType) != -1) {    // to check boolean datatype
-                value = (value == "false") ? false : !!value;
-            } else if ($.inArray(property, props.stringType) != -1) {     // to check input string
+            } else if ($.inArray(property, props.booleanType) !== -1) {    // to check boolean datatype
+                value = (value === "false") ? false : !!value;
+            } else if ($.inArray(property, props.stringType) !== -1) {     // to check input string
                 value = value.toLowerCase();
             }
 
-            if (this.options[property] == value) {
+            if (this.options[property] === value) {
                 return;
             }
 
@@ -1506,7 +1662,7 @@
                 case "circleShape":
                     this._refreshCircleShape();
 
-                    if (this.options.circleShape == "full") {
+                    if (this.options.circleShape === "full") {
                         this.options.startAngle = 0;
                         this.options.endAngle = "+360";
                     }
@@ -1524,26 +1680,26 @@
                 return;
             }
             if ($isPlainObject(property)) {
-                if (property["min"] !== undefined || property["max"] !== undefined) {
-                    if (property["min"] !== undefined) {
-                        this.options.min = property["min"];
-                        delete property["min"];
+                if (property['min'] !== undefined || property['max'] !== undefined) {
+                    if (property['min'] !== undefined) {
+                        this.options.min = property['min'];
+                        delete property['min'];
                     }
 
-                    if (property["max"] !== undefined) {
-                        this.options.max = property["max"];
-                        delete property["max"];
+                    if (property['max'] !== undefined) {
+                        this.options.max = property['max'];
+                        delete property['max'];
                     }
 
-                    if (property["value"] == undefined) {
-                        this._set("value", this.options.value);
+                    if (property['value'] === undefined) {
+                        this._set('value', this.options.value);
                     }
                 }
 
                 for (var prop in property) {
                     this._set(prop, property[prop]);
                 }
-            } else if (property && typeof property == "string") {
+            } else if (property && typeof property === 'string') {
                 if (value === undefined) {
                     return this._get(property);
                 }
@@ -1555,38 +1711,40 @@
         },
 
         getValue: function (index) {
-            if (this.options.sliderType == "range" && isNumber(index)) {
+            if (this.options.sliderType === 'range' && isNumber(index)) {
                 var i = parseFloat(index);
-                if (i == 1 || i == 2) {
-                    return this["_handle" + i].value;
-                }
+                return this._handles[i].value;
             }
 
-            return this._get("value");
+            return this._get('value');
         },
 
         setValue: function (value, index) {
             if (isNumber(value)) {
                 if (isNumber(index)) {
-                    if (this.options.sliderType == "range") {
-                        var i = parseFloat(index), val = parseFloat(value);
-                        if (i == 1) {
-                            value = val + "," + this._handle2.value;
-                        } else if (i == 2) {
-                            value = this._handle1.value + "," + val;
+                    if (this._multiRangeSlider) {
+                        // var i = parseFloat(index)
+                        // var val = parseFloat(value);
+
+                        for (var i = 0; i < this._handles.length; i++) {
+                            if (i === 0) {
+                                value += this._handles[i].value;
+                            } else {
+                                value += ',' + this._handles[i].value;
+                            }
                         }
-                    } else if (this.options.sliderType == "default") {
+                    } else if (this.options.sliderType === 'default') {
                         this._active = index;
                     }
                 }
 
-                this._set("value", value);
+                this._set('value', value);
             }
         },
 
         disable: function () {
             this.options.disabled = true;
-            this.container.addClass("rs-disabled");
+            this.container.addClass('rs-disabled');
             this._readOnly(true);
         },
 
@@ -1617,7 +1775,7 @@
         return setTransform(this, degree);
     }
 
-    if (typeof $.fn.outerHeight == "undefined") {
+    if (typeof $.fn.outerHeight === "undefined") {
         $.fn.outerHeight = function () {
             return this[0].offsetHeight;
         }
@@ -1678,7 +1836,7 @@
     function createElement(tag) {
         var t = tag.split('.');
 
-        return $(document.createElement(t[0])).addClass(t[1] || "");
+        return $(document.createElement(t[0])).addClass(t[1] || '');
     }
 
     function getdistance(p1, p2) {
@@ -1686,11 +1844,11 @@
     }
 
     function setTransform(control, value) {
-        control.css('-webkit-transform', "rotate(" + value + "deg)");
-        control.css('-moz-transform', "rotate(" + value + "deg)");
-        control.css('-ms-transform', "rotate(" + value + "deg)");
-        control.css('-o-transform', "rotate(" + value + "deg)");
-        control.css('transform', "rotate(" + value + "deg)");
+        control.css('-webkit-transform', 'rotate(' + value + 'deg)');
+        control.css('-moz-transform', 'rotate(' + value + 'deg)');
+        control.css('-ms-transform', 'rotate(' + value + 'deg)');
+        control.css('-o-transform', 'rotate(' + value + 'deg)');
+        control.css('transform', 'rotate(' + value + 'deg)');
 
         return control;
     }
@@ -1706,9 +1864,9 @@
         // the options value holds the updated defaults value
         this.options = $.extend({}, this.defaults, options);
 
-        if (this._raise("beforeCreate") !== false) {
+        if (this._raise('beforeCreate') !== false) {
             this._init();
-            this._raise("create");
+            this._raise('create');
         } else {
             this._removeData();
         }
@@ -1721,14 +1879,14 @@
             if (!instance) {
                 $data(that, pluginName, new RoundSlider(that, options));
             } else if ($isPlainObject(options)) {
-                if (typeof instance.option === "function") {
+                if (typeof instance.option === 'function') {
                     instance.option(options);
-                } else if (that.id && window[that.id] && typeof window[that.id].option === "function") {
+                } else if (that.id && window[that.id] && typeof window[that.id].option === 'function') {
                     window[that.id].option(options);
                 }
-            } else if (typeof options === "string") {
-                if (typeof instance[options] === "function") {
-                    if ((options === "option" || options.indexOf("get") === 0) && args[2] === undefined) {
+            } else if (typeof options === 'string') {
+                if (typeof instance[options] === 'function') {
+                    if ((options === 'option' || options.indexOf('get') === 0) && args[2] === undefined) {
                         return instance[options](args[1]);
                     }
 
