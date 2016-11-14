@@ -7,7 +7,23 @@
   "style": "dist/roundslider.min.css",
   "browser": "dist/roundslider.js",
   "scripts": {
-    "uglify": "uglifyjs --compress --mangle dist/roundslider.js --output dist/roundslider.min.js"
+    "build-js": "better-npm-run uglifyjs",
+    "build-css": "better-npm-run scss-2-css && better-npm-run autoprefix && better-npm-run cleancss",
+    "build": "npm run build-js && npm run build-css && rimraf dist/roundslider.prefixed.css"
+  },
+  "betterScripts": {
+    "scss-2-css": {
+      "command": "node-sass --include-path scss dist/scss/roundslider.scss dist/roundslider.css"
+    },
+    "autoprefix": {
+      "command": "postcss --use autoprefixer dist/roundslider.css -o dist/roundslider.prefixed.css"
+    },
+    "cleancss": {
+      "command": "cleancss -o dist/roundslider.min.css dist/roundslider.prefixed.css"
+    },
+    "uglifyjs": {
+      "command": "uglifyjs dist/roundslider.js --output dist/roundslider.min.js --compress --mangle"
+    }
   },
   "repository": {
     "type": "git",
@@ -46,7 +62,13 @@
   },
   "homepage": "https://github.com/floviolleau/npm-round-slider#readme",
   "devDependencies": {
+    "autoprefixer": "^6.5.3",
+    "better-npm-run": "0.0.13",
+    "clean-css": "^3.4.20",
     "jquery": "^3.1.1",
+    "node-sass": "^3.12.2",
+    "postcss-cli": "^2.6.0",
+    "rimraf": "^2.5.4",
     "uglify-js": "^2.7.3"
   }
 }
