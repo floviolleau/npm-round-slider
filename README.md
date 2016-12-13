@@ -6,6 +6,14 @@ npm-round-slider
 
 # roundSlider - A free jQuery plugin
 
+========================================================================================================================================
+## This project is still under development. I put it aside for the moment to try it in an another way (SVG way and if I succeed, I will add a link to the github). I tried with this fork of roundSlider to organise the code, rewrite it to understand it better and add support of multiple handles accordingly to a configuration object.
+
+## I partialy succeeded in doing it AND what is simply missing is to colorize correctly the good path between handles. If anyone is interested in continuing this project or have an idea, he is the most welcome to contribute.
+
+## Thanks
+========================================================================================================================================
+
 ### Installation
 
 ```
